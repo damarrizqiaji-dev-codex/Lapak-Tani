@@ -28,6 +28,7 @@ interface AppContextType {
   activeView: ActiveView;
   isAddHarvestOpen: boolean;
   isCalculatorOpen: boolean;
+  isGuideOpen: boolean;
   activeOffersCount: number;
   activeTransactionsCount: number;
   toast: { id: string; message: string; type?: 'success' | 'info' | 'warning' } | null;
@@ -35,6 +36,8 @@ interface AppContextType {
   closeToast: () => void;
   openCalculator: () => void;
   closeCalculator: () => void;
+  openGuide: () => void;
+  closeGuide: () => void;
   goToTab: (tab: ActiveTab) => void;
   viewProduct: (productId: string) => void;
   openAjukanPenawaran: (productId: string) => void;
@@ -63,6 +66,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [historyStack, setHistoryStack] = useState<ActiveView[]>([]);
   const [isAddHarvestOpen, setIsAddHarvestOpen] = useState<boolean>(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [toast, setToast] = useState<{ id: string; message: string; type?: 'success' | 'info' | 'warning' } | null>(null);
   const [version, setVersion] = useState<number>(0);
 
@@ -77,6 +81,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const closeToast = () => setToast(null);
   const openCalculator = () => setIsCalculatorOpen(true);
   const closeCalculator = () => setIsCalculatorOpen(false);
+  const openGuide = () => setIsGuideOpen(true);
+  const closeGuide = () => setIsGuideOpen(false);
 
   const refreshAll = () => {
     setCurrentUser(getCurrentUser());
@@ -191,6 +197,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         activeView,
         isAddHarvestOpen,
         isCalculatorOpen,
+        isGuideOpen,
         activeOffersCount,
         activeTransactionsCount,
         toast,
@@ -198,6 +205,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         closeToast,
         openCalculator,
         closeCalculator,
+        openGuide,
+        closeGuide,
         goToTab,
         viewProduct,
         openAjukanPenawaran,

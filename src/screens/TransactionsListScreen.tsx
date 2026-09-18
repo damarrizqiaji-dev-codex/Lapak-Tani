@@ -14,11 +14,14 @@ import {
   Sprout, 
   Store,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  HelpCircle,
+  FileText,
+  Scale
 } from 'lucide-react';
 
 export const TransactionsListScreen: React.FC = () => {
-  const { currentUser, viewTransaction, openRuangNegosiasi } = useApp();
+  const { currentUser, viewTransaction, openRuangNegosiasi, openGuide } = useApp();
   const [activeSegment, setActiveSegment] = useState<'transaksi' | 'penawaran'>('transaksi');
 
   const allTransactions = getTransactions().filter(t => 
@@ -28,12 +31,19 @@ export const TransactionsListScreen: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full pb-24 space-y-4">
-      {/* 1. Header Banner */}
-      <section className="bg-white p-4.5 rounded-2xl shadow-xs border border-[#e2e8f0] space-y-1">
-        <div className="flex items-center gap-2">
+      {/* 1. Header Banner with Guide trigger */}
+      <section className="bg-white p-4.5 rounded-2xl shadow-xs border border-[#e2e8f0] space-y-2">
+        <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold text-[#a44a04] bg-[#fff5eb] px-2 py-0.5 rounded-md border border-[#fed7aa] uppercase tracking-wider">
             Akad &amp; Surat Jalan
           </span>
+          <button
+            onClick={openGuide}
+            className="flex items-center gap-1 text-[11.5px] font-bold text-[#1e5128] hover:underline cursor-pointer"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>Alur Transaksi</span>
+          </button>
         </div>
         <h1 className="text-[20px] font-extrabold text-[#0f2316] leading-snug">
           Buku Transaksi &amp; Penawaran
@@ -54,7 +64,7 @@ export const TransactionsListScreen: React.FC = () => {
           }`}
         >
           <Receipt className="w-4 h-4" />
-          <span>Transaksi Selesai &amp; Akad ({allTransactions.length})</span>
+          <span>Akad &amp; Nota ({allTransactions.length})</span>
         </button>
 
         <button

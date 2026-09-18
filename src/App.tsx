@@ -16,9 +16,10 @@ import { TransactionsListScreen } from './screens/TransactionsListScreen';
 import { AddProductModal } from './screens/AddProductModal';
 import { Toast } from './components/Toast';
 import { InteractiveCalculatorModal } from './components/InteractiveCalculatorModal';
+import { GuideModal } from './components/GuideModal';
 
 const AppContent: React.FC = () => {
-  const { activeView, activeTab, toast, closeToast, isCalculatorOpen, closeCalculator } = useApp();
+  const { activeView, activeTab, toast, closeToast, isCalculatorOpen, closeCalculator, isGuideOpen, closeGuide, currentUser } = useApp();
 
   // 1. Full-screen Login / Register flow
   if (activeView.type === 'login') {
@@ -40,6 +41,7 @@ const AppContent: React.FC = () => {
         </div>
         <Toast toast={toast} onClose={closeToast} />
         <InteractiveCalculatorModal isOpen={isCalculatorOpen} onClose={closeCalculator} />
+        <GuideModal isOpen={isGuideOpen} onClose={closeGuide} defaultRole={currentUser?.role} />
       </main>
     );
   }
@@ -53,6 +55,7 @@ const AppContent: React.FC = () => {
         </div>
         <Toast toast={toast} onClose={closeToast} />
         <InteractiveCalculatorModal isOpen={isCalculatorOpen} onClose={closeCalculator} />
+        <GuideModal isOpen={isGuideOpen} onClose={closeGuide} defaultRole={currentUser?.role} />
       </main>
     );
   }
@@ -66,6 +69,7 @@ const AppContent: React.FC = () => {
         </div>
         <Toast toast={toast} onClose={closeToast} />
         <InteractiveCalculatorModal isOpen={isCalculatorOpen} onClose={closeCalculator} />
+        <GuideModal isOpen={isGuideOpen} onClose={closeGuide} defaultRole={currentUser?.role} />
       </main>
     );
   }
@@ -79,6 +83,7 @@ const AppContent: React.FC = () => {
         </div>
         <Toast toast={toast} onClose={closeToast} />
         <InteractiveCalculatorModal isOpen={isCalculatorOpen} onClose={closeCalculator} />
+        <GuideModal isOpen={isGuideOpen} onClose={closeGuide} defaultRole={currentUser?.role} />
       </main>
     );
   }
@@ -98,6 +103,7 @@ const AppContent: React.FC = () => {
       <BottomNav />
       <AddProductModal />
       <InteractiveCalculatorModal isOpen={isCalculatorOpen} onClose={closeCalculator} />
+      <GuideModal isOpen={isGuideOpen} onClose={closeGuide} defaultRole={currentUser?.role} />
       <Toast toast={toast} onClose={closeToast} />
     </div>
   );
