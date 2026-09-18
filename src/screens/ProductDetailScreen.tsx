@@ -25,7 +25,7 @@ interface ProductDetailScreenProps {
 }
 
 export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ productId }) => {
-  const { backToPrevious, openAjukanPenawaran, goToTab } = useApp();
+  const { backToPrevious, openAjukanPenawaran, goToTab, currentUser, openAddHarvest } = useApp();
   const product = getProductById(productId);
 
   if (!product) {
@@ -249,23 +249,41 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ produc
       </section>
 
       {/* 8. Fixed Bottom Action Dock */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#c1c9bd]/30 p-3 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#e2e8f0] p-3 shadow-lg">
         <div className="max-w-2xl mx-auto flex items-center gap-2.5">
           <button
             onClick={() => goToTab('komunitas')}
-            className="h-12 px-4 rounded-xl bg-[#f0edf1] hover:bg-[#eae7eb] text-[#1b1b1e] font-bold text-[13px] flex items-center justify-center gap-1.5 shrink-0 transition-colors"
+            className="h-12 px-4 rounded-xl bg-[#f8faf9] hover:bg-[#f1f5f2] text-[#0f2316] border border-[#e2e8f0] font-bold text-[13px] flex items-center justify-center gap-1.5 shrink-0 transition-colors"
           >
             <MessageSquare className="w-4 h-4 text-[#1e5128]" />
             <span>Forum</span>
           </button>
 
-          <button
-            onClick={() => openAjukanPenawaran(product.id)}
-            className="flex-1 h-12 rounded-xl bg-[#1e5128] hover:bg-[#013a13] text-white font-bold text-[15px] flex items-center justify-center gap-2 shadow-md transition-transform active:scale-[0.99] cursor-pointer"
-          >
-            <span>Ajukan Penawaran Harga</span>
-            <ArrowRight className="w-4.5 h-4.5" />
-          </button>
+          {currentUser.role === 'petani' && product.farmerId === currentUser.id ? (
+            <button
+              onClick={() => goToTab('transaksi')}
+              className="flex-1 h-12 rounded-xl bg-[#1e5128] hover:bg-[#163f1f] text-white font-extrabold text-[14px] flex items-center justify-center gap-2 shadow-md transition-transform active:scale-[0.99] cursor-pointer"
+            >
+              <span>Lihat Tawaran Masuk untuk Panen Ini</span>
+              <ArrowRight className="w-4.5 h-4.5" />
+            </button>
+          ) : currentUser.role === 'petani' ? (
+            <button
+              onClick={() => openAddHarvest()}
+              className="flex-1 h-12 rounded-xl bg-[#edf7ed] hover:bg-[#e2f2e3] text-[#1e5128] border border-[#c4e1c5] font-extrabold text-[14px] flex items-center justify-center gap-2 transition-transform active:scale-[0.99] cursor-pointer"
+            >
+              <Sprout className="w-4.5 h-4.5" />
+              <span>Pasang Panen Serupa Milik Anda</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => openAjukanPenawaran(product.id)}
+              className="flex-1 h-12 rounded-xl bg-[#a44a04] hover:bg-[#853c03] text-white font-extrabold text-[15px] flex items-center justify-center gap-2 shadow-md transition-transform active:scale-[0.99] cursor-pointer"
+            >
+              <span>Ajukan Tawar Harga Grosir</span>
+              <ArrowRight className="w-4.5 h-4.5" />
+            </button>
+          )}
         </div>
       </div>
     </div>

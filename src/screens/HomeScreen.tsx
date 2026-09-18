@@ -304,11 +304,24 @@ export const HomeScreen: React.FC = () => {
         {activeOffers.length === 0 ? (
           <div className="bg-white p-6 rounded-xl border border-[#e2e8f0] text-center space-y-1">
             <p className="text-[14px] font-semibold text-[#0f2316]">
-              Belum ada penawaran masuk.
+              {currentUser.role === 'petani' 
+                ? 'Belum ada penawaran harga masuk dari pedagang.' 
+                : 'Belum ada negosiasi harga yang sedang aktif.'}
             </p>
             <p className="text-[12px] text-[#64748b]">
-              Penawaran dari pedagang akan muncul di sini saat hasil panen Anda ditawar.
+              {currentUser.role === 'petani'
+                ? 'Penawaran dari pedagang akan muncul di sini saat komoditas panen Anda ditawar.'
+                : 'Kunjungi Pasar Grosir dan ajukan harga beli pertama Anda ke petani.'}
             </p>
+            {currentUser.role === 'pedagang' && (
+              <button
+                onClick={() => goToTab('pasar')}
+                className="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-[#a44a04] hover:underline"
+              >
+                <span>Buka Katalog Pasar Panen</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         ) : (
           activeOffers.map((offer) => (
