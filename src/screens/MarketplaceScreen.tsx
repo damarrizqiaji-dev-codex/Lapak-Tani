@@ -212,15 +212,56 @@ export const MarketplaceScreen: React.FC = () => {
       {/* 5. Products Grid */}
       <div className="flex flex-col gap-3.5">
         {filteredProducts.length === 0 ? (
-          <div className="bg-white p-8 rounded-2xl border border-[#e2e8f0] text-center space-y-2">
-            <p className="text-[14px] font-bold text-[#0f2316]">Tidak ada komoditas ditemukan.</p>
-            <p className="text-[12px] text-[#64748b]">Coba ganti kata kunci pencarian atau bersihkan filter wilayah.</p>
-            <button
-              onClick={() => { setSearchTerm(''); setSelectedCategory('semua'); setSelectedLocation('semua'); setFarmerOnlyFilter('semua'); }}
-              className="mt-2 text-[12px] font-bold text-[#1e5128] underline cursor-pointer"
-            >
-              Reset Semua Filter
-            </button>
+          <div className="bg-white p-8 rounded-2xl border border-[#e2e8f0] text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-[#edf7ed] text-[#1e5128] mx-auto flex items-center justify-center">
+              <Sprout className="w-7 h-7" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-[15px] font-bold text-[#0f2316]">
+                {allProducts.length === 0 
+                  ? 'Katalog Panen Masih Bersih (0 Komoditas)' 
+                  : 'Tidak Ada Komoditas yang Cocok'}
+              </h3>
+              <p className="text-[12.5px] text-[#64748b] max-w-sm mx-auto">
+                {allProducts.length === 0
+                  ? 'Platform ini siap untuk transaksi riil. Petani dapat mulai memajang hasil panen cabai, bawang, atau jagung segar pertama sekarang.'
+                  : 'Coba ubah kata kunci pencarian komoditas atau bersihkan filter wilayah dan kategori.'}
+              </p>
+            </div>
+
+            {allProducts.length === 0 ? (
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                {isPetani ? (
+                  <button
+                    onClick={openAddHarvest}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#1e5128] text-white font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-[#163f1f] shadow-xs cursor-pointer"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Pasang Panen Perdana</span>
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-[12px] text-[#a44a04] font-medium">
+                      Anda berada di mode Pedagang. Pasokan panen akan muncul seketika setelah petani memajang hasil kebunnya.
+                    </p>
+                    <button
+                      onClick={openCalculator}
+                      className="px-4 py-2 rounded-xl bg-[#f8faf9] border border-[#cbd5e1] text-[#0f2316] font-bold text-[12px] flex items-center justify-center gap-1.5 mx-auto hover:bg-[#f1f5f2]"
+                    >
+                      <Calculator className="w-4 h-4 text-[#a44a04]" />
+                      <span>Buka Simulasi Muatan Armada</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => { setSearchTerm(''); setSelectedCategory('semua'); setSelectedLocation('semua'); setFarmerOnlyFilter('semua'); }}
+                className="mt-2 text-[12.5px] font-bold text-[#1e5128] underline cursor-pointer"
+              >
+                Reset Semua Filter
+              </button>
+            )}
           </div>
         ) : (
           filteredProducts.map((product) => {
@@ -314,7 +355,7 @@ export const MarketplaceScreen: React.FC = () => {
                   </div>
 
                   {/* Price & Role-Specific Action Area */}
-                  <div className="pt-2 border-t border-[#e2e8f0]/80 flex items-end justify-between gap-3">
+                  <div className="pt-2 border-t border-[#e2e8f0]/80 flex flex-col xs:flex-row xs:items-end justify-between gap-2.5">
                     <div className="space-y-0.5">
                       <span className="text-[11px] text-[#71717a] block font-medium">
                         Harga Buka Petani
@@ -326,7 +367,7 @@ export const MarketplaceScreen: React.FC = () => {
                     </div>
 
                     {/* ROLE-SPECIFIC CTA BUTTONS */}
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 self-end xs:self-auto">
                       <button
                         onClick={openCalculator}
                         title="Simulasi margin angkut"

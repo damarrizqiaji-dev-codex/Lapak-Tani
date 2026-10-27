@@ -36,7 +36,7 @@ const AppContent: React.FC = () => {
     return (
       <main className="min-h-screen bg-[#fbf8fc] text-[#1b1b1e]">
         <Header />
-        <div className="max-w-2xl mx-auto px-4 pt-20">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-17 sm:pt-20 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]">
           <ProductDetailScreen productId={activeView.productId} />
         </div>
         <Toast toast={toast} onClose={closeToast} />
@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
     return (
       <main className="min-h-screen bg-[#fbf8fc] text-[#1b1b1e]">
         <Header />
-        <div className="max-w-2xl mx-auto px-4 pt-20">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-17 sm:pt-20 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]">
           <AjukanPenawaranScreen productId={activeView.productId} />
         </div>
         <Toast toast={toast} onClose={closeToast} />
@@ -64,7 +64,7 @@ const AppContent: React.FC = () => {
     return (
       <main className="min-h-screen bg-[#fbf8fc] text-[#1b1b1e]">
         <Header />
-        <div className="max-w-2xl mx-auto px-4 pt-20">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-17 sm:pt-20 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]">
           <RuangNegosiasiScreen offerId={activeView.offerId} />
         </div>
         <Toast toast={toast} onClose={closeToast} />
@@ -78,7 +78,7 @@ const AppContent: React.FC = () => {
     return (
       <main className="min-h-screen bg-[#fbf8fc] text-[#1b1b1e]">
         <Header />
-        <div className="max-w-2xl mx-auto px-4 pt-20">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-17 sm:pt-20 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]">
           <TransactionDetailScreen transactionId={activeView.transactionId} />
         </div>
         <Toast toast={toast} onClose={closeToast} />
@@ -92,7 +92,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fbf8fc] text-[#1b1b1e] flex flex-col">
       <Header />
-      <main className="flex-1 max-w-2xl w-full mx-auto px-4 pt-20">
+      <main className="flex-1 max-w-2xl w-full mx-auto px-3 sm:px-4 pt-17 sm:pt-20 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         {activeTab === 'beranda' && <HomeScreen />}
         {activeTab === 'pasar' && <MarketplaceScreen />}
         {activeTab === 'komunitas' && <CommunityScreen />}

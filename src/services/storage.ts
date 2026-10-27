@@ -21,17 +21,18 @@ import {
   INITIAL_COMMUNITIES,
   INITIAL_POSTS
 } from './mockData';
+import { supabaseService } from './supabaseService';
 
 const STORAGE_KEYS = {
-  USERS: 'lapaktani_users_v1',
-  CURRENT_USER_ID: 'lapaktani_current_user_id_v1',
-  PRODUCTS: 'lapaktani_products_v1',
-  OFFERS: 'lapaktani_offers_v1',
-  NEGOTIATIONS: 'lapaktani_negotiations_v1',
-  TRANSACTIONS: 'lapaktani_transactions_v1',
-  COMMUNITIES: 'lapaktani_communities_v1',
-  POSTS: 'lapaktani_posts_v1',
-  COMMENTS: 'lapaktani_comments_v1',
+  USERS: 'lapaktani_users_v2',
+  CURRENT_USER_ID: 'lapaktani_current_user_id_v2',
+  PRODUCTS: 'lapaktani_products_v2',
+  OFFERS: 'lapaktani_offers_v2',
+  NEGOTIATIONS: 'lapaktani_negotiations_v2',
+  TRANSACTIONS: 'lapaktani_transactions_v2',
+  COMMUNITIES: 'lapaktani_communities_v2',
+  POSTS: 'lapaktani_posts_v2',
+  COMMENTS: 'lapaktani_comments_v2',
 };
 
 function getStored<T>(key: string, fallback: T): T {
@@ -59,7 +60,7 @@ export function initStorage(): void {
     setStored(STORAGE_KEYS.USERS, INITIAL_USERS);
   }
   if (!localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID)) {
-    setStored(STORAGE_KEYS.CURRENT_USER_ID, 'user-joko'); // default to Pak Joko Susilo (Petani)
+    setStored(STORAGE_KEYS.CURRENT_USER_ID, 'user-petani-utama');
   }
   if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
     setStored(STORAGE_KEYS.PRODUCTS, INITIAL_PRODUCTS);
@@ -97,10 +98,39 @@ export function resetStorage(): void {
   initStorage();
 }
 
+// Asynchronously pull latest from Supabase into cache
+export async function syncFromSupabase(): Promise<void> {
+  if (!supabaseService.isReady()) return;
+
+  try {
+    const [cloudProducts, cloudOffers, cloudTransactions, cloudPosts] = await Promise.all([
+      supabaseService.getProducts(),
+      supabaseService.getOffers(),
+      supabaseService.getTransactions(),
+      supabaseService.getCommunityPosts(),
+    ]);
+
+    if (cloudProducts !== null) {
+      setStored(STORAGE_KEYS.PRODUCTS, cloudProducts);
+    }
+    if (cloudOffers !== null) {
+      setStored(STORAGE_KEYS.OFFERS, cloudOffers);
+    }
+    if (cloudTransactions !== null) {
+      setStored(STORAGE_KEYS.TRANSACTIONS, cloudTransactions);
+    }
+    if (cloudPosts !== null) {
+      setStored(STORAGE_KEYS.POSTS, cloudPosts);
+    }
+  } catch (err) {
+    console.warn('Sync from Supabase failed, falling back to local storage cache:', err);
+  }
+}
+
 // User methods
 export function getCurrentUser(): User {
   initStorage();
-  const currentId = getStored<string>(STORAGE_KEYS.CURRENT_USER_ID, 'user-joko');
+  const currentId = getStored<string>(STORAGE_KEYS.CURRENT_USER_ID, 'user-petani-utama');
   const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
   const found = users.find(u => u.id === currentId);
   return found || users[0];
@@ -123,12 +153,12 @@ export function registerOrLoginUser(phone: string, role: 'petani' | 'pedagang', 
     const newId = 'user-' + Date.now();
     user = {
       id: newId,
-      name: name || (role === 'petani' ? 'Petani Baru' : 'Pedagang Baru'),
+      name: name || (role === 'petani' ? 'Petani Terdaftar' : 'Pedagang Terdaftar'),
       email: `${newId}@lapaktani.id`,
       role,
       phone,
       location: 'Rembang, Jawa Tengah',
-      groupName: role === 'petani' ? 'Kelompok Tani Mitra' : 'Grosir Mandiri',
+      groupName: role === 'petani' ? 'Kelompok Tani Mandiri' : 'Grosir Mandiri',
       verified: true,
       completedTransactionsCount: 0,
       reputation: 5.0,
@@ -137,11 +167,17 @@ export function registerOrLoginUser(phone: string, role: 'petani' | 'pedagang', 
     users.push(user);
     setStored(STORAGE_KEYS.USERS, users);
   } else {
-    // If logging in, optionally update role if user explicitly switched
     user.role = role;
+    if (name) user.name = name;
     setStored(STORAGE_KEYS.USERS, users);
   }
   setCurrentUserId(user.id);
+
+  // Sync profile to Supabase in background
+  if (supabaseService.isReady()) {
+    supabaseService.upsertProfile(user).catch(console.error);
+  }
+
   return user;
 }
 
@@ -165,6 +201,12 @@ export function createProduct(productData: Omit<Product, 'id' | 'createdAt' | 's
   };
   products.unshift(newProduct);
   setStored(STORAGE_KEYS.PRODUCTS, products);
+
+  // Sync to Supabase cloud
+  if (supabaseService.isReady()) {
+    supabaseService.insertProduct(newProduct).catch(console.error);
+  }
+
   return newProduct;
 }
 
@@ -174,6 +216,12 @@ export function updateProductStatus(id: string, status: ProductStatus): void {
   if (idx !== -1) {
     products[idx].status = status;
     setStored(STORAGE_KEYS.PRODUCTS, products);
+
+    // Sync to Supabase
+    if (supabaseService.isReady()) {
+      const allowedStatus = status === 'tersedia' ? 'tersedia' : status === 'terjual' ? 'terjual' : 'dipesan';
+      supabaseService.updateProductStatus(id, allowedStatus).catch(console.error);
+    }
   }
 }
 
@@ -209,7 +257,7 @@ export function createOffer(
   const users = getAllUsers();
   const trader = users.find(u => u.id === traderId) || {
     id: traderId,
-    name: 'Pedagang',
+    name: 'Pedagang Terdaftar',
     location: 'Jawa Tengah'
   };
 
@@ -248,6 +296,11 @@ export function createOffer(
     message: message || 'Mengajukan penawaran harga.',
   });
 
+  // Sync to Supabase
+  if (supabaseService.isReady()) {
+    supabaseService.insertOffer(newOffer).catch(console.error);
+  }
+
   return newOffer;
 }
 
@@ -280,6 +333,11 @@ export function addNegotiation(data: Omit<Negotiation, 'id' | 'createdAt'>): Neg
     offers[offerIdx].status = 'dinegosiasi';
     offers[offerIdx].updatedAt = newEntry.createdAt;
     setStored(STORAGE_KEYS.OFFERS, offers);
+
+    // Sync to Supabase
+    if (supabaseService.isReady()) {
+      supabaseService.updateOfferStatus(data.offerId, 'dinegosiasi').catch(console.error);
+    }
   }
 
   return newEntry;
@@ -296,6 +354,10 @@ export function acceptOffer(offerId: string): Transaction {
     offers[offerIdx].status = 'diterima';
     offers[offerIdx].updatedAt = new Date().toISOString();
     setStored(STORAGE_KEYS.OFFERS, offers);
+
+    if (supabaseService.isReady()) {
+      supabaseService.updateOfferStatus(offerId, 'diterima').catch(console.error);
+    }
   }
 
   // Update product status
@@ -322,15 +384,20 @@ export function acceptOffer(offerId: string): Transaction {
     totalValue: offer.quantity * offer.offeredPrice,
     transactionDate: dateFormatted,
     status: 'disepakati',
-    location: 'Kebun Blok C, Desa Pedak, Rembang, Jawa Tengah',
+    location: 'Kebun Mitra Petani, Jawa Tengah',
     pickupSchedule: 'Esok Hari • 08:00 WIB',
-    pickupVehicle: 'Armada Pick-up L300',
+    pickupVehicle: 'Armada Angkut Pick-up / Truk',
     driverName: 'Sopir Ekspedisi Mitra',
     paymentMethod: 'Timbang bersama di lokasi & pembayaran tunai / transfer langsung sesaat setelah muatan terisi.',
   };
 
   transactions.unshift(newTrx);
   setStored(STORAGE_KEYS.TRANSACTIONS, transactions);
+
+  // Sync to Supabase
+  if (supabaseService.isReady()) {
+    supabaseService.insertTransaction(newTrx).catch(console.error);
+  }
 
   return newTrx;
 }
@@ -342,6 +409,10 @@ export function rejectOffer(offerId: string): void {
     offers[offerIdx].status = 'ditolak';
     offers[offerIdx].updatedAt = new Date().toISOString();
     setStored(STORAGE_KEYS.OFFERS, offers);
+
+    if (supabaseService.isReady()) {
+      supabaseService.updateOfferStatus(offerId, 'ditolak').catch(console.error);
+    }
   }
 }
 
@@ -362,147 +433,165 @@ export function updateTransactionStatus(transactionId: string, status: Transacti
     transactions[idx].status = status;
     setStored(STORAGE_KEYS.TRANSACTIONS, transactions);
 
-    // If marked as selesai, update product status to 'terjual'
-    if (status === 'selesai') {
-      updateProductStatus(transactions[idx].productId, 'terjual');
-
-      // Increment farmer completed transaction count
-      const users = getAllUsers();
-      const farmerIdx = users.findIndex(u => u.id === transactions[idx].farmerId);
-      if (farmerIdx !== -1) {
-        users[farmerIdx].completedTransactionsCount += 1;
-        setStored(STORAGE_KEYS.USERS, users);
-      }
+    if (supabaseService.isReady()) {
+      const allowedStatus = status === 'selesai' ? 'selesai' : status === 'diproses' ? 'proses_timbang' : 'disepakati';
+      supabaseService.updateTransactionStatus(transactionId, allowedStatus).catch(console.error);
     }
   }
 }
 
-// Price Information derived strictly from actual transaction data
-export function getPriceInfo(commodityKeyword?: string): PriceSummary {
-  const transactions = getTransactions();
-  const products = getProducts();
-  const offers = getOffers();
-
-  // Filter transactions matching commodity
-  const targetCommodity = commodityKeyword || 'Cabai Merah Keriting';
-  const matchingTrx = transactions.filter(t => 
-    t.commodityName.toLowerCase().includes(targetCommodity.toLowerCase()) &&
-    (t.status === 'disepakati' || t.status === 'selesai')
-  );
-
-  if (matchingTrx.length === 0) {
-    return {
-      commodityName: targetCommodity,
-      averagePrice: 0,
-      startingPriceAverage: 0,
-      traderOfferMin: 0,
-      traderOfferMax: 0,
-      lastTransactionPrice: 0,
-      lastTransactionTime: '',
-      totalVolume: 0,
-      totalValue: 0,
-      transactionCount: 0,
-      hasEnoughData: false,
-      transactions: []
-    };
-  }
-
-  // Calculate actual numbers
-  const totalVolume = matchingTrx.reduce((sum, t) => sum + t.quantity, 0);
-  const totalValue = matchingTrx.reduce((sum, t) => sum + t.totalValue, 0);
-  const averagePrice = Math.round(totalValue / totalVolume);
-
-  // Farmer starting price from relevant active products
-  const matchingProds = products.filter(p => p.commodityName.toLowerCase().includes(targetCommodity.toLowerCase()));
-  const startingPriceAverage = matchingProds.length > 0 
-    ? Math.round(matchingProds.reduce((sum, p) => sum + p.startingPrice, 0) / matchingProds.length)
-    : 30000;
-
-  // Trader offers range
-  const matchingOffers = offers.filter(o => o.commodityName.toLowerCase().includes(targetCommodity.toLowerCase()));
-  const offerPrices = matchingOffers.map(o => o.offeredPrice);
-  const traderOfferMin = offerPrices.length > 0 ? Math.min(...offerPrices) : 27000;
-  const traderOfferMax = offerPrices.length > 0 ? Math.max(...offerPrices) : 28500;
-
-  const latestTrx = matchingTrx[0];
-
-  return {
-    commodityName: targetCommodity,
-    averagePrice,
-    startingPriceAverage,
-    traderOfferMin,
-    traderOfferMax,
-    lastTransactionPrice: latestTrx.finalPrice,
-    lastTransactionTime: latestTrx.transactionDate,
-    totalVolume,
-    totalValue,
-    transactionCount: matchingTrx.length,
-    hasEnoughData: matchingTrx.length >= 1,
-    transactions: matchingTrx.map(t => ({
-      id: t.id,
-      date: t.transactionDate.split(',')[0],
-      location: t.location,
-      volume: t.quantity,
-      parties: `${t.farmerName} ↔ ${t.traderName}`,
-      price: t.finalPrice
-    }))
-  };
-}
-
-// Community & Posts
+// Communities
 export function getCommunities(): Community[] {
   initStorage();
   return getStored<Community[]>(STORAGE_KEYS.COMMUNITIES, INITIAL_COMMUNITIES);
 }
 
-export function getPosts(communityId?: string): Post[] {
-  initStorage();
-  const posts = getStored<Post[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS);
-  if (!communityId || communityId === 'all') return posts;
-  return posts.filter(p => p.communityId === communityId);
+export function getCommunityById(id: string): Community | undefined {
+  return getCommunities().find(c => c.id === id);
 }
 
-export function createPost(data: Omit<Post, 'id' | 'createdAt' | 'commentsCount' | 'responsesCount'>): Post {
-  const posts = getStored<Post[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS);
+// Posts
+export function getPosts(communityId?: string): Post[] {
+  initStorage();
+  const all = getStored<Post[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS);
+  if (communityId) {
+    return all.filter(p => p.communityId === communityId);
+  }
+  return all;
+}
+
+export function createPost(postData: Omit<Post, 'id' | 'createdAt' | 'responsesCount' | 'commentsCount'>): Post {
+  const posts = getPosts();
+  const now = new Date();
   const newPost: Post = {
-    ...data,
+    ...postData,
     id: 'post-' + Date.now(),
-    createdAt: 'Baru saja',
-    commentsCount: 0,
+    createdAt: now.toISOString(),
     responsesCount: 0,
+    commentsCount: 0,
   };
   posts.unshift(newPost);
   setStored(STORAGE_KEYS.POSTS, posts);
+
+  if (supabaseService.isReady()) {
+    supabaseService.insertCommunityPost(newPost).catch(console.error);
+  }
+
   return newPost;
 }
 
+// Comments
 export function getComments(postId: string): Comment[] {
   initStorage();
-  const comments = getStored<Comment[]>(STORAGE_KEYS.COMMENTS, []);
-  return comments.filter(c => c.postId === postId);
+  const all = getStored<Comment[]>(STORAGE_KEYS.COMMENTS, []);
+  return all.filter(c => c.postId === postId);
 }
 
-export function addComment(postId: string, author: User, content: string): Comment {
+export function addComment(
+  postId: string, 
+  author: User | string, 
+  contentOrName: string, 
+  authorRole?: 'petani' | 'pedagang', 
+  contentStr?: string
+): Comment {
   const comments = getStored<Comment[]>(STORAGE_KEYS.COMMENTS, []);
+  const now = new Date();
+  
+  let authorId = '';
+  let authorName = '';
+  let role: 'petani' | 'pedagang' = 'petani';
+  let content = '';
+
+  if (typeof author === 'object') {
+    authorId = author.id;
+    authorName = author.name;
+    role = author.role;
+    content = contentOrName;
+  } else {
+    authorId = author;
+    authorName = contentOrName;
+    role = authorRole || 'petani';
+    content = contentStr || '';
+  }
+
   const newComment: Comment = {
-    id: 'cmt-' + Date.now(),
+    id: 'comment-' + Date.now(),
     postId,
-    authorId: author.id,
-    authorName: author.name,
-    authorRole: author.role,
+    authorId,
+    authorName,
+    authorRole: role,
     content,
-    createdAt: 'Baru saja',
+    createdAt: now.toISOString(),
   };
   comments.push(newComment);
   setStored(STORAGE_KEYS.COMMENTS, comments);
 
-  // Increment post comment count
+  // Increment comments count on post
   const posts = getPosts();
   const pIdx = posts.findIndex(p => p.id === postId);
   if (pIdx !== -1) {
-    posts[pIdx].commentsCount += 1;
+    posts[pIdx].commentsCount = (posts[pIdx].commentsCount || 0) + 1;
     setStored(STORAGE_KEYS.POSTS, posts);
   }
 
   return newComment;
 }
+
+// Price Summary calculation
+export function getPriceSummary(commodity: string): PriceSummary {
+  const transactions = getTransactions();
+  const matched = transactions.filter(t => 
+    t.commodityName.toLowerCase().includes(commodity.toLowerCase()) && 
+    (t.status === 'selesai' || t.status === 'disepakati')
+  );
+
+  if (matched.length === 0) {
+    return {
+      commodityName: commodity,
+      averagePrice: 0,
+      startingPriceAverage: 0,
+      traderOfferMin: 0,
+      traderOfferMax: 0,
+      lastTransactionPrice: 0,
+      lastTransactionTime: 'Belum ada transaksi',
+      totalVolume: 0,
+      totalValue: 0,
+      transactionCount: 0,
+      hasEnoughData: false,
+      transactions: [],
+    };
+  }
+
+  const prices = matched.map(m => m.finalPrice);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const sum = prices.reduce((a, b) => a + b, 0);
+  const avgPrice = Math.round(sum / prices.length);
+  const totalVolume = matched.reduce((a, b) => a + b.quantity, 0);
+  const totalValue = matched.reduce((a, b) => a + b.totalValue, 0);
+
+  return {
+    commodityName: commodity,
+    averagePrice: avgPrice,
+    startingPriceAverage: avgPrice,
+    traderOfferMin: minPrice,
+    traderOfferMax: maxPrice,
+    lastTransactionPrice: matched[0].finalPrice,
+    lastTransactionTime: matched[0].transactionDate,
+    totalVolume,
+    totalValue,
+    transactionCount: matched.length,
+    hasEnoughData: true,
+    transactions: matched.map(m => ({
+      id: m.id,
+      date: m.transactionDate,
+      location: m.location,
+      volume: m.quantity,
+      parties: `${m.farmerName} → ${m.traderName}`,
+      price: m.finalPrice,
+    })),
+  };
+}
+
+// Export alias for backward compatibility
+export const getPriceInfo = getPriceSummary;

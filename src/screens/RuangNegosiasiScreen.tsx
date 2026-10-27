@@ -308,16 +308,16 @@ export const RuangNegosiasiScreen: React.FC<RuangNegosiasiScreenProps> = ({ offe
         </div>
       </section>
 
-      {/* 5. Fixed Decision Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#e2e8f0] p-3 shadow-lg">
+      {/* 5. Fixed Decision Bar with Safe Area */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#e2e8f0] px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-lg select-none">
         <div className="max-w-2xl mx-auto flex items-center gap-2">
           {offer.status === 'diterima' ? (
-            <div className="w-full h-12 bg-[#edf7ed] border border-[#c4e1c5] text-[#0f3d1e] font-bold text-[14px] rounded-xl flex items-center justify-center gap-2">
+            <div className="w-full h-11 sm:h-12 bg-[#edf7ed] border border-[#c4e1c5] text-[#0f3d1e] font-bold text-[13.5px] sm:text-[14px] rounded-xl flex items-center justify-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-[#1e5128]" />
               <span>Penawaran Sudah Disepakati</span>
             </div>
           ) : offer.status === 'ditolak' ? (
-            <div className="w-full h-12 bg-[#fee2e2] text-[#991b1b] font-bold text-[14px] rounded-xl flex items-center justify-center gap-2">
+            <div className="w-full h-11 sm:h-12 bg-[#fee2e2] text-[#991b1b] font-bold text-[13.5px] sm:text-[14px] rounded-xl flex items-center justify-center gap-2">
               <X className="w-5 h-5" />
               <span>Penawaran Telah Ditolak</span>
             </div>
@@ -326,7 +326,7 @@ export const RuangNegosiasiScreen: React.FC<RuangNegosiasiScreenProps> = ({ offe
               {/* Tolak Button */}
               <button
                 onClick={() => setConfirmRejectOpen(true)}
-                className="h-12 px-4 rounded-xl border border-[#dc2626] text-[#dc2626] hover:bg-[#fee2e2]/40 font-bold text-[13px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl border border-[#dc2626] text-[#dc2626] hover:bg-[#fee2e2]/40 font-bold text-[12.5px] sm:text-[13px] flex items-center justify-center gap-1 transition-transform active:scale-95 cursor-pointer"
               >
                 <X className="w-4 h-4" />
                 <span>Tolak</span>
@@ -335,7 +335,7 @@ export const RuangNegosiasiScreen: React.FC<RuangNegosiasiScreenProps> = ({ offe
               {/* Counteroffer Button */}
               <button
                 onClick={() => setIsCounterModalOpen(true)}
-                className="flex-1 h-12 rounded-xl bg-[#f1f5f2] hover:bg-[#e4ece5] text-[#0f2316] font-bold text-[14px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="flex-1 h-11 sm:h-12 rounded-xl bg-[#f1f5f2] hover:bg-[#e4ece5] text-[#0f2316] font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-1.5 transition-transform active:scale-[0.98] cursor-pointer"
               >
                 <Gavel className="w-4 h-4 text-[#a44a04]" />
                 <span>Tawar Balik</span>
@@ -345,10 +345,10 @@ export const RuangNegosiasiScreen: React.FC<RuangNegosiasiScreenProps> = ({ offe
               <button
                 onClick={() => setConfirmAcceptOpen(true)}
                 disabled={isProcessing}
-                className="flex-1 h-12 rounded-xl bg-[#1e5128] hover:bg-[#163f1f] text-white font-bold text-[14px] flex items-center justify-center gap-1.5 shadow-sm transition-transform active:scale-[0.99] cursor-pointer"
+                className="flex-1 h-11 sm:h-12 rounded-xl bg-[#1e5128] hover:bg-[#163f1f] text-white font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-1.5 shadow-sm transition-transform active:scale-[0.98] cursor-pointer"
               >
                 <Handshake className="w-4 h-4" />
-                <span>Setujui Harga</span>
+                <span>Setujui</span>
               </button>
             </>
           )}
@@ -363,7 +363,7 @@ export const RuangNegosiasiScreen: React.FC<RuangNegosiasiScreenProps> = ({ offe
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 40 }}
-              className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl"
+              className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
             >
               <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
                 <h3 className="text-[16px] font-extrabold text-[#0f2316] flex items-center gap-2">

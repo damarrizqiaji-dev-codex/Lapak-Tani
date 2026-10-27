@@ -1,0 +1,6 @@
+{
+  "summary":  "Rencana implementasi platform Lapak Tani menjadi aplikasi produksi nyata:\n1. Membersihkan seluruh data tiruan/dummy awal (0 data awal) sehingga hanya data asli dari petani & pedagang yang tampil.\n2. Menyediakan panel/modal konfigurasi koneksi Supabase langsung di antarmuka web (bisa memasukkan Supabase Project URL dan Anon Key kapan saja dengan tes koneksi otomatis).\n3. Sinkronisasi penuh dua arah (CRUD) antara antarmuka (posting panen, ajukan penawaran, tawar-menawar langsung, akad transaksi, komunitas pasokan) langsung ke database PostgreSQL Supabase.\n4. Fitur Registrasi/Login Petani & Pedagang asli dengan penyimpanan profil permanen.\n5. Indikator status live database di header/profil agar pengguna langsung tahu apakah terhubung ke cloud Supabase atau offline mode.",
+  "updatedAt":  "2026-10-27T01:51:27.651358756Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

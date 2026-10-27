@@ -49,7 +49,7 @@ export const InteractiveCalculatorModal: React.FC<InteractiveCalculatorModalProp
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
           transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-          className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto"
+          className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#c1c9bd]/20 pb-3">

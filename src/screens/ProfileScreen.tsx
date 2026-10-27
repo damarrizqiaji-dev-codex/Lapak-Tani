@@ -24,7 +24,8 @@ import {
   ShoppingBag,
   MessageSquare,
   TrendingUp,
-  Truck
+  Truck,
+  Database
 } from 'lucide-react';
 
 export const ProfileScreen: React.FC = () => {
@@ -37,7 +38,9 @@ export const ProfileScreen: React.FC = () => {
     openRuangNegosiasi,
     goToTab,
     openCalculator,
-    showToast
+    showToast,
+    openDatabaseModal,
+    isSupabaseLive
   } = useApp();
 
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
@@ -95,7 +98,7 @@ export const ProfileScreen: React.FC = () => {
         </div>
 
         {/* Phone & Mode Switcher */}
-        <div className="pt-3 border-t border-[#e2e8f0] flex flex-wrap items-center justify-between gap-2 text-[12px]">
+        <div className="pt-3 border-t border-[#e2e8f0] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-[12px]">
           <div className="flex items-center gap-1.5 text-[#52525b]">
             <Phone className={`w-3.5 h-3.5 ${isPetani ? 'text-[#1e5128]' : 'text-[#a44a04]'}`} />
             <span className="font-semibold text-[#0f2316]">{currentUser.phone}</span>
@@ -103,7 +106,7 @@ export const ProfileScreen: React.FC = () => {
 
           <button
             onClick={handleRoleToggle}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold text-[11.5px] cursor-pointer transition-colors active:scale-95 ${
+            className={`flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl border font-bold text-[12px] cursor-pointer transition-all active:scale-95 shadow-2xs ${
               isPetani 
                 ? 'bg-[#fff5eb] text-[#8a3800] border-[#fed7aa] hover:bg-[#ffedd5]' 
                 : 'bg-[#edf7ed] text-[#0f3d1e] border-[#c4e1c5] hover:bg-[#e2f2e3]'
@@ -296,6 +299,32 @@ export const ProfileScreen: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-[#a1a1aa]" />
           </button>
         )}
+
+        {/* Cloud Database Integration */}
+        <button
+          onClick={openDatabaseModal}
+          className="w-full p-3.5 flex items-center justify-between text-left hover:bg-[#f8faf9] transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5">
+            <Database className="w-4 h-4 text-emerald-700" />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-bold text-[#0f2316]">
+                  Koneksi Database Cloud (Supabase)
+                </span>
+                <span className={`text-[10px] font-extrabold px-1.5 py-0.2 rounded-md ${
+                  isSupabaseLive ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                }`}>
+                  {isSupabaseLive ? 'Live Aktif' : 'Perlu Kunci'}
+                </span>
+              </div>
+              <span className="text-[11px] text-[#64748b]">
+                Sinkronkan data hasil panen, penawaran harga, &amp; akad transaksi secara langsung.
+              </span>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[#a1a1aa]" />
+        </button>
 
         <button
           onClick={() => showToast(isPetani ? 'Data Kelompok Tani telah terverifikasi.' : 'Profil usaha pedagang terverifikasi aktif.', 'success')}

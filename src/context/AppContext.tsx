@@ -9,7 +9,10 @@ import {
   getTransactions,
   registerOrLoginUser,
   initStorage,
+  syncFromSupabase,
 } from '../services/storage';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { DatabaseConfigModal } from '../components/DatabaseConfigModal';
 
 export type ActiveTab = 'beranda' | 'pasar' | 'komunitas' | 'transaksi' | 'profil' | 'harga';
 
@@ -29,6 +32,8 @@ interface AppContextType {
   isAddHarvestOpen: boolean;
   isCalculatorOpen: boolean;
   isGuideOpen: boolean;
+  isDatabaseModalOpen: boolean;
+  isSupabaseLive: boolean;
   activeOffersCount: number;
   activeTransactionsCount: number;
   toast: { id: string; message: string; type?: 'success' | 'info' | 'warning' } | null;
@@ -38,6 +43,8 @@ interface AppContextType {
   closeCalculator: () => void;
   openGuide: () => void;
   closeGuide: () => void;
+  openDatabaseModal: () => void;
+  closeDatabaseModal: () => void;
   goToTab: (tab: ActiveTab) => void;
   viewProduct: (productId: string) => void;
   openAjukanPenawaran: (productId: string) => void;
@@ -67,6 +74,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isAddHarvestOpen, setIsAddHarvestOpen] = useState<boolean>(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState<boolean>(false);
+  const [isSupabaseLive, setIsSupabaseLive] = useState<boolean>(() => isSupabaseConfigured());
   const [toast, setToast] = useState<{ id: string; message: string; type?: 'success' | 'info' | 'warning' } | null>(null);
   const [version, setVersion] = useState<number>(0);
 
@@ -83,16 +92,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const closeCalculator = () => setIsCalculatorOpen(false);
   const openGuide = () => setIsGuideOpen(true);
   const closeGuide = () => setIsGuideOpen(false);
+  const openDatabaseModal = () => setIsDatabaseModalOpen(true);
+  const closeDatabaseModal = () => setIsDatabaseModalOpen(false);
 
   const refreshAll = () => {
     setCurrentUser(getCurrentUser());
     setAllUsers(getAllUsers());
+    setIsSupabaseLive(isSupabaseConfigured());
     setVersion(v => v + 1);
   };
 
   useEffect(() => {
     initStorage();
     refreshAll();
+
+    // Trigger Supabase cloud pull if configured
+    if (isSupabaseConfigured()) {
+      syncFromSupabase().then(() => {
+        refreshAll();
+      });
+    }
   }, []);
 
   const goToTab = (tab: ActiveTab) => {
@@ -141,7 +160,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const switchUserRole = (newRole: UserRole) => {
     const users = getAllUsers();
-    // Switch to appropriate counterpart (Pak Joko for petani, H. Anwar for pedagang)
     const targetUser = users.find(u => u.role === newRole) || users[0];
     setCurrentUserId(targetUser.id);
     setCurrentUser(targetUser);
@@ -198,6 +216,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isAddHarvestOpen,
         isCalculatorOpen,
         isGuideOpen,
+        isDatabaseModalOpen,
+        isSupabaseLive,
         activeOffersCount,
         activeTransactionsCount,
         toast,
@@ -207,6 +227,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         closeCalculator,
         openGuide,
         closeGuide,
+        openDatabaseModal,
+        closeDatabaseModal,
         goToTab,
         viewProduct,
         openAjukanPenawaran,
@@ -223,6 +245,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }}
     >
       {children}
+      <DatabaseConfigModal
+        isOpen={isDatabaseModalOpen}
+        onClose={closeDatabaseModal}
+        onConfigSaved={() => {
+          showToast('Koneksi Supabase diperbarui & disinkronkan!', 'success');
+          syncFromSupabase().then(() => refreshAll());
+        }}
+      />
     </AppContext.Provider>
   );
 };

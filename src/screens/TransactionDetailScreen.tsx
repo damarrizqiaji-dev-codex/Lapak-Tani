@@ -288,31 +288,31 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
         </span>
       </section>
 
-      {/* 9. Fixed Bottom Action Dock */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#e2e8f0] p-3 shadow-lg">
-        <div className="max-w-2xl mx-auto flex items-center gap-2.5">
+      {/* 9. Fixed Bottom Action Dock with Safe Area */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#e2e8f0] px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-lg select-none">
+        <div className="max-w-2xl mx-auto flex items-center gap-2">
           <a
             href={`https://wa.me/6281398765432?text=Halo,%20terkait%20transaksi%20${transaction.transactionCode}%20di%20Lapak%20Tani.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="h-12 px-4 rounded-xl bg-[#f1f5f2] hover:bg-[#e4ece5] text-[#1e5128] font-bold text-[13px] flex items-center justify-center gap-1.5 shrink-0 transition-colors"
+            className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl bg-[#f1f5f2] hover:bg-[#e4ece5] text-[#1e5128] font-bold text-[12.5px] sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 transition-transform active:scale-95"
           >
             <Phone className="w-4 h-4" />
-            <span>Chat WA</span>
+            <span className="hidden xs:inline">Chat WA</span>
           </a>
 
           {!isCompleted ? (
             <button
               onClick={() => setConfirmCompleteOpen(true)}
-              className="flex-1 h-12 rounded-xl bg-[#1e5128] hover:bg-[#163f1f] text-white font-bold text-[14px] flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-[0.99] cursor-pointer"
+              className="flex-1 h-11 sm:h-12 rounded-xl bg-[#1e5128] hover:bg-[#163f1f] text-white font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-1.5 shadow-sm transition-transform active:scale-[0.98] cursor-pointer"
             >
-              <CheckCircle2 className="w-5 h-5" />
-              <span>Konfirmasi Transaksi Selesai</span>
+              <CheckCircle2 className="w-4.5 h-4.5 shrink-0" />
+              <span className="truncate">Konfirmasi Selesai</span>
             </button>
           ) : (
-            <div className="flex-1 h-12 rounded-xl bg-[#edf7ed] border border-[#c4e1c5] text-[#0f3d1e] font-bold text-[14px] flex items-center justify-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-[#1e5128]" />
-              <span>Transaksi Telah Selesai</span>
+            <div className="flex-1 h-11 sm:h-12 rounded-xl bg-[#edf7ed] border border-[#c4e1c5] text-[#0f3d1e] font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4.5 h-4.5 text-[#1e5128]" />
+              <span className="truncate">Transaksi Selesai</span>
             </div>
           )}
         </div>

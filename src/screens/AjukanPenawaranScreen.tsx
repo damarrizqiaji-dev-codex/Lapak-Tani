@@ -313,12 +313,12 @@ export const AjukanPenawaranScreen: React.FC<AjukanPenawaranScreenProps> = ({ pr
           </p>
         </div>
 
-        {/* Fixed Bottom Submit Button */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#c1c9bd]/30 p-3 shadow-lg">
+        {/* Fixed Bottom Submit Button with Safe Area */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#c1c9bd]/30 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-lg select-none">
           <div className="max-w-2xl mx-auto">
             <button
               type="submit"
-              className="w-full h-12 bg-[#1e5128] hover:bg-[#013a13] text-white font-bold text-[15px] rounded-xl flex items-center justify-center gap-2 shadow-md transition-transform active:scale-[0.99] cursor-pointer"
+              className="w-full h-11 sm:h-12 bg-[#1e5128] hover:bg-[#013a13] text-white font-bold text-[14px] sm:text-[15px] rounded-xl flex items-center justify-center gap-2 shadow-md transition-transform active:scale-[0.98] cursor-pointer"
             >
               <Send className="w-4.5 h-4.5" />
               <span>Kirim Penawaran ke Petani</span>
